@@ -1,27 +1,22 @@
-import google.generativeai as genai
-import os
-
-def verify_api_key(api_key):
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content("Hello, Gemini!", safety_settings={'HARASSMENT': 'block_none'})
-        print("API Key is valid! Response from Gemini:")
-        print(response.text)
-        return True
-    except Exception as e:
-        print(f"API Key verification failed. Error: {e}")
-        print("Please double-check your API key and ensure it has access to the Generative Language API.")
-        return False
+from openai import OpenAI
+import argparse
 
 def main():
-    print("\n--- Google Gemini API Key Verifier ---")
-    api_key = input("Please enter your Google Gemini API Key: ")
+    parser = argparse.ArgumentParser(description="LiteLLM Endpoint Verifier")
+    parser.add_argument("--api-key", required=True, help="Your LiteLLM API Key")
+    parser.add_argument("--base-url", required=True, help="Base URL for the LiteLLM API")
+    args = parser.parse_args()
 
-    if verify_api_key(api_key):
-        print("\nVerification successful. Your API key is ready for use.")
-    else:
-        print("\nVerification failed. Please check the error message above.")
+    client = OpenAI(api_key=args.api_key, base_url=args.base_url)
+
+    try:
+        models = client.models.list()
+        print("\nAvailable Models:")
+        for model in models:
+            print(f"  - {model.id}")
+        print("\nLiteLLM endpoint is valid and reachable.")
+    except Exception as e:
+        print(f"\nError connecting to LiteLLM endpoint: {e}")
 
 if __name__ == "__main__":
     main()
